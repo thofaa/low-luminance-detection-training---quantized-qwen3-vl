@@ -39,6 +39,29 @@ class PreprocessExDarkTests(unittest.TestCase):
             self.assertIn("<|object_ref_start|>car<|object_ref_end|>", record["prompt"])
             self.assertIn("<|box_start|>(100,100),(500,400)<|box_end|>", record["prompt"])
 
+    def test_explicit_dimension_overrides_take_precedence(self) -> None:
+        payload = {
+            "image_width": 1000,
+            "image_height": 1000,
+            "detections": [
+                {
+                    "label": "person",
+                    "bounding_box": {"x_min": 50, "y_min": 20, "x_max": 100, "y_max": 40},
+                    "luminance_level": "low",
+                    "confidence": 0.8,
+                    "reasoning": "visible outline",
+                }
+            ],
+        }
+        with tempfile.TemporaryDirectory() as td:
+            input_path = Path(td) / "ann.json"
+            output_path = Path(td) / "out.jsonl"
+            input_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            convert_annotations(input_path, output_path, image_width=200, image_height=100)
+            record = json.loads(output_path.read_text(encoding="utf-8").strip())
+            self.assertIn("<|box_start|>(250,200),(500,400)<|box_end|>", record["prompt"])
+
 
 if __name__ == "__main__":
     unittest.main()

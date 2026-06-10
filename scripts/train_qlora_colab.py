@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import inspect
 from dataclasses import dataclass
 
 from peft import LoraConfig
@@ -46,12 +45,10 @@ def build_training_args(cfg: TrainConfig) -> TrainingArguments:
         "load_best_model_at_end": True,
         "report_to": "none",
     }
-    parameters = inspect.signature(TrainingArguments.__init__).parameters
-    if "eval_strategy" in parameters:
-        kwargs["eval_strategy"] = "epoch"
-    else:
-        kwargs["evaluation_strategy"] = "epoch"
-    return TrainingArguments(**kwargs)
+    try:
+        return TrainingArguments(eval_strategy="epoch", **kwargs)
+    except TypeError:
+        return TrainingArguments(evaluation_strategy="epoch", **kwargs)
 
 
 def main() -> None:

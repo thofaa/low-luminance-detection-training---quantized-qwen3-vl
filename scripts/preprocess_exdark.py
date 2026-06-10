@@ -68,7 +68,9 @@ def _infer_dimension(data: dict[str, Any], explicit: int | None, keys: list[str]
         value = data.get(key)
         if value is not None:
             return int(value)
-    raise ValueError(f"Missing required dimension. Provide one of {keys} or CLI override.")
+    raise ValueError(
+        f"Missing required dimension. Provide one of {keys} in JSON or use --image-width/--image-height."
+    )
 
 
 def convert_annotations(input_path: Path, output_path: Path, image_width: int | None, image_height: int | None) -> int:
